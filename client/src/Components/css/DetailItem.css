@@ -1,0 +1,13 @@
+.container-detail {
+  display: flex;
+}
+.item-1-detail {
+  flex: 2;
+}
+.detail-flex {
+  display: flex;
+  flex-direction: column;
+}
+.item-2-detail {
+  cursor: pointer;
+}

@@ -1,0 +1,139 @@
+input,
+select {
+  width: 100%;
+  font: inherit;
+  border-radius: 5px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.container1.flex {
+  border-style: solid;
+  border-color: #254870;
+  border-width: 2px;
+}
+
+.flex {
+  display: flex;
+}
+.item {
+  padding: 5px;
+  margin: 10px;
+}
+
+.container1 .item-1 {
+  flex-grow: 2;
+}
+.container1 .item-2 {
+  flex-grow: 1;
+}
+.container1 .item-3 {
+  flex-grow: 3;
+}
+
+.item-1 div {
+  /* border-style: solid;
+  border-color: #ffffff;
+  border-width: 1px; */
+}
+
+.container2 .item-1 .patient-info {
+  background-color: #ffc107;
+  text-align: center;
+  line-height: 2px;
+  color: black;
+  border-radius: 30px;
+  max-width: 250px;
+  margin: 0 auto;
+  margin-top: 10px;
+}
+
+.container2 .item-1 {
+  flex-grow: 10;
+
+  border-style: solid;
+  border-color: #ffc107;
+  border-width: 2px;
+
+  /* justify-content: center; */
+  flex-direction: column;
+}
+.container2 .item-2 {
+  flex-grow: 1;
+  height: 600px;
+  border-style: solid;
+  border-color: #254870;
+  border-width: 2px;
+}
+.container2 .item-2.item {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-2-1.item .item1 {
+  flex: 2;
+  margin-right: 10px;
+}
+.item-2-1.item .item1 input {
+  min-width: 0;
+}
+.item-2-1.item .item2 {
+  flex: 1;
+}
+.item1 input {
+  width: 100%;
+  min-width: fit-content;
+}
+
+.item-2-1 {
+  flex: 1;
+}
+.item-2-2 {
+  flex: 2;
+}
+.item-2-2 input {
+  height: 60%;
+}
+.item-2-3 {
+  flex: 1;
+  justify-content: space-between;
+}
+
+.item-2-4 {
+  flex: 0.5;
+  /* background-color: #ffc107; */
+
+  text-align: center;
+}
+
+.item-2-4 button {
+  width: 100%;
+  height: 100%;
+  background-color: #ffc107;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.add-btn {
+  font-family: "Roboto Slab", serif;
+  font-size: 20px;
+  cursor: pointer;
+  font-weight: 400;
+}
+.add-btn:hover {
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .flex {
+    flex-direction: column;
+  }
+
+  .container2.flex {
+    flex-direction: column;
+    flex-direction: column-reverse;
+  }
+}
