@@ -7,7 +7,7 @@ import TimelineContent from "@mui/lab/TimelineContent";
 import TimelineDot from "@mui/lab/TimelineDot";
 import TimelineOppositeContent from "@mui/lab/TimelineOppositeContent";
 import "./css/TimeLineItem.css";
-function TimeLineItem() {
+function TimeLineItem(props) {
   return (
     <Timeline position="right">
       <div className="timeline-main">

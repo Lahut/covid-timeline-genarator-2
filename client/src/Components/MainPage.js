@@ -1,16 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./css/MainPage.css";
 import TimeLineItem from "./TimeLineItem";
+import axios from "axios";
 function MainPage() {
   const [patient, SetPatient] = useState({
     gender: "male",
     age: 0,
     occupation: "",
-    dateTime: "",
-    to: "",
+    dateFrom: "",
+    dateTo: "",
     desc: "",
     location: "",
+    locationType: "indoor",
   });
+
+  const [tokenFromLocalStorage, setTokenFromLocalStorage] = useState({
+    visitedPlace: [],
+    timelines: {},
+  });
+
+  useEffect(() => {
+    const timelines = localStorage.getItem("timelines");
+    const visitedPlaces = localStorage.getItem("visitedPlaces");
+    if (tokenFromLocalStorage) {
+      console.log("There you go");
+    }
+  }, [tokenFromLocalStorage]);
 
   const OnChangeHandler = (e) => {
     SetPatient({ ...patient, [e.target.id]: e.target.value });
@@ -23,7 +38,47 @@ function MainPage() {
   };
 
   const handleSubmit = () => {
-    clearFields();
+    if (localStorage.getItem("timelines")) {
+      console.log("put");
+      const body = patient;
+      body["visitedPlaces"] = JSON.parse(localStorage.getItem("visitedPlaces"));
+      body["timelines"] = JSON.parse(localStorage.getItem("timelines"));
+      console.log(body);
+      axios
+        .put("http://localhost:3001/timeline", body)
+        .then((res) => {
+          console.log(res.data.visitedPlaces);
+          localStorage.setItem("timelines", JSON.stringify(res.data.timelines));
+          localStorage.setItem(
+            "visitedPlaces",
+            JSON.stringify(res.data.visitedPlaces)
+          );
+          setTokenFromLocalStorage({
+            timelines: res.data.timelines,
+            visitedPlace: res.data.visitedPlaces,
+          });
+        })
+        .catch((err) => console.log(err));
+    } else {
+      console.log("post");
+      axios
+        .post("http://localhost:3001/timeline", patient)
+        .then((res) => {
+          console.log(res.data.visitedPlaces);
+          localStorage.setItem("timelines", JSON.stringify(res.data.timeLines));
+          localStorage.setItem(
+            "visitedPlaces",
+            JSON.stringify(res.data.visitedPlace)
+          );
+          setTokenFromLocalStorage({
+            timelines: res.data.timeLines,
+            visitedPlace: res.data.visitedPlace,
+          });
+        })
+        .catch((err) => console.log(err));
+    }
+
+    // clearFields();
     console.log(patient);
   };
   return (
@@ -66,20 +121,23 @@ function MainPage() {
 
           <h2>Visited Places</h2>
         </div>
-        {/* End item1 */}
         <div className="item-2 item">
           <div className="item-2-1 item flex">
             <div className="item1">
               <p>From</p>
               <input
-                id="dateTime"
+                id="dateFrom"
                 onChange={(e) => OnChangeHandler(e)}
                 type="datetime-local"
               />
             </div>
             <div className="item2">
               <p>To</p>
-              <input id="to" onChange={(e) => OnChangeHandler(e)} type="time" />
+              <input
+                id="dateTo"
+                onChange={(e) => OnChangeHandler(e)}
+                type="time"
+              />
             </div>
           </div>
           <div className="item-2-2 item">
@@ -89,11 +147,11 @@ function MainPage() {
           <div className="item-2-3 item flex">
             <div className="item1">
               <p>Location Type</p>
-              <select>
-                <option>INDOOR</option>
-                <option>OUTDOOR</option>
-                <option>HOME</option>
-                <option>TRAVELLING</option>
+              <select id="locationType" onChange={OnChangeHandler}>
+                <option value="indoor">INDOOR</option>
+                <option value="outdoor">OUTDOOR</option>
+                <option value="home">HOME</option>
+                <option value="travelling">TRAVELLING</option>
               </select>
             </div>
             <div className="item2">
