@@ -1,13 +1,16 @@
 .container-detail {
   display: flex;
+  width: 100%;
 }
 .item-1-detail {
-  flex: 2;
+  flex: 10;
+  padding-left: 50px;
 }
 .detail-flex {
   display: flex;
   flex-direction: column;
 }
 .item-2-detail {
+  flex: 1;
   cursor: pointer;
 }

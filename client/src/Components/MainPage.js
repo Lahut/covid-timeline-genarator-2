@@ -4,28 +4,29 @@ import TimeLineItem from "./TimeLineItem";
 import axios from "axios";
 function MainPage() {
   const [patient, SetPatient] = useState({
-    gender: "male",
+    gender: "",
     age: 0,
     occupation: "",
     dateFrom: "",
     dateTo: "",
     desc: "",
     location: "",
-    locationType: "indoor",
+    locationType: "",
   });
+
+  const initializeState = (key) => {
+    if (localStorage.getItem("timelines") === null) {
+      return [];
+    }
+
+    return JSON.parse(localStorage.getItem(key));
+  };
 
   const [tokenFromLocalStorage, setTokenFromLocalStorage] = useState({
-    visitedPlace: [],
-    timelines: {},
+    visitedPlace: initializeState("visitedPlaces"),
+    timelines: initializeState("timelines"),
+    patientInfo: initializeState("patient_info"),
   });
-
-  useEffect(() => {
-    const timelines = localStorage.getItem("timelines");
-    const visitedPlaces = localStorage.getItem("visitedPlaces");
-    if (tokenFromLocalStorage) {
-      console.log("There you go");
-    }
-  }, [tokenFromLocalStorage]);
 
   const OnChangeHandler = (e) => {
     SetPatient({ ...patient, [e.target.id]: e.target.value });
@@ -33,7 +34,9 @@ function MainPage() {
 
   const clearFields = () => {
     for (const prop in patient) {
-      document.getElementById(prop).value = "";
+      if (!prop.toString().includes(["age", "gender", "occupation"])) {
+        document.getElementById(prop).value = "";
+      }
     }
   };
 
@@ -43,7 +46,6 @@ function MainPage() {
       const body = patient;
       body["visitedPlaces"] = JSON.parse(localStorage.getItem("visitedPlaces"));
       body["timelines"] = JSON.parse(localStorage.getItem("timelines"));
-      console.log(body);
       axios
         .put("http://localhost:3001/timeline", body)
         .then((res) => {
@@ -54,32 +56,43 @@ function MainPage() {
             JSON.stringify(res.data.visitedPlaces)
           );
           setTokenFromLocalStorage({
+            ...tokenFromLocalStorage,
             timelines: res.data.timelines,
             visitedPlace: res.data.visitedPlaces,
           });
         })
         .catch((err) => console.log(err));
     } else {
-      console.log("post");
       axios
         .post("http://localhost:3001/timeline", patient)
         .then((res) => {
-          console.log(res.data.visitedPlaces);
+          console.log(res.data.gender);
           localStorage.setItem("timelines", JSON.stringify(res.data.timeLines));
+          localStorage.setItem(
+            "patient_info",
+            JSON.stringify({
+              age: res.data.age,
+              gender: res.data.gender,
+              occupation: res.data.occupation,
+            })
+          );
           localStorage.setItem(
             "visitedPlaces",
             JSON.stringify(res.data.visitedPlace)
           );
+
           setTokenFromLocalStorage({
             timelines: res.data.timeLines,
             visitedPlace: res.data.visitedPlace,
+            patientInfo: {
+              age: res.data.age,
+              gender: res.data.gender,
+              occupation: res.data.occupation,
+            },
           });
         })
         .catch((err) => console.log(err));
     }
-
-    // clearFields();
-    console.log(patient);
   };
   return (
     <div className="container">
@@ -89,17 +102,21 @@ function MainPage() {
         <div className="item-1 item">
           <p>Gender</p>
           <select id="gender" onChange={(e) => OnChangeHandler(e)}>
+            <option value="" selected disabled hidden>
+              Choose here
+            </option>
             <option value="male">Male</option>
             <option value="female">Female</option>
           </select>
         </div>
         <div className="item-2 item">
           <p>Age</p>
-          <input id="age" type="text" onChange={(e) => OnChangeHandler(e)} />
+          <input id="age" onChange={(e) => OnChangeHandler(e)} />
         </div>
         <div className="item-3 item">
           <p>Occupation</p>
           <input
+            value={patient.occupation}
             id="occupation"
             type="text"
             onChange={(e) => OnChangeHandler(e)}
@@ -110,16 +127,27 @@ function MainPage() {
       <div className="container2 flex">
         <div className="item-1 item">
           <div className="patient-info item">
-            <h6>Female</h6>
-            <h3>32 years old</h3>
-            <h6>Software Engsdfineer</h6>
+            <h6>{tokenFromLocalStorage.patientInfo.gender}</h6>
+            <h3>{tokenFromLocalStorage.patientInfo.age} years old</h3>
+            <h6>{tokenFromLocalStorage.patientInfo.occupation}</h6>
           </div>
-          <TimeLineItem />
-          <TimeLineItem />
-          <TimeLineItem />
-          <TimeLineItem />
-
+          {tokenFromLocalStorage.timelines.map((item, index) => {
+            return (
+              <TimeLineItem
+                key={index}
+                dateMain={item.dateMain}
+                durations={item.durations}
+              />
+            );
+          })}
           <h2>Visited Places</h2>
+          <div className="text-visited">
+            {tokenFromLocalStorage.visitedPlace.map((item) => {
+              return (
+                <h4 style={{ color: "white", marginLeft: "5px" }}>{item}</h4>
+              );
+            })}
+          </div>
         </div>
         <div className="item-2 item">
           <div className="item-2-1 item flex">
@@ -148,6 +176,9 @@ function MainPage() {
             <div className="item1">
               <p>Location Type</p>
               <select id="locationType" onChange={OnChangeHandler}>
+                <option value="" selected disabled hidden>
+                  Choose here
+                </option>
                 <option value="indoor">INDOOR</option>
                 <option value="outdoor">OUTDOOR</option>
                 <option value="home">HOME</option>

@@ -40,6 +40,10 @@ select {
   border-width: 1px; */
 }
 
+.text-visited {
+  display: flex;
+}
+
 .container2 .item-1 .patient-info {
   background-color: #ffc107;
   text-align: center;

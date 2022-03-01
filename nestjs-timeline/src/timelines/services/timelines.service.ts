@@ -144,5 +144,32 @@ export class TimeLineService {
     return timelines;
   }
 
-  sortVisitedPlace(visitedPlaces: string[]) {}
+  deleteDuration(
+    timelines: TimeLineItem[],
+    dateToDelete: string,
+    mainDateToDelete: string,
+  ) {
+    const timelines_ = timelines.map((item) => {
+      if (
+        new Date(item.dateMain).getTime() ===
+        new Date(mainDateToDelete).getTime()
+      ) {
+        item.durations.filter(
+          (item) =>
+            new Date(item.dateFrom).getTime() !==
+            new Date(dateToDelete).getTime(),
+        );
+      }
+    });
+    return { timelines: timelines_ };
+  }
+
+  deleteMainDate(timelines: TimeLineItem[], mainDateToDelete: string) {
+    const tl = timelines.filter(
+      (item) =>
+        new Date(item.dateMain).getTime() !==
+        new Date(mainDateToDelete).getTime(),
+    );
+    return tl;
+  }
 }

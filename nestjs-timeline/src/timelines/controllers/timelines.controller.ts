@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put, Delete } from '@nestjs/common';
 import { TimeLine } from '../models/timeline.model';
 import { TimeLineItem } from '../models/timelineItem.model';
 import { TimeLineService } from '../services/timelines.service';
@@ -55,5 +55,26 @@ export class TimelinesController {
       timelines,
       visitedPlaces,
     );
+  }
+
+  @Delete()
+  deleteDuration(
+    @Body('timelines') timelines: TimeLineItem[],
+    @Body('dateToDelete') dateToDelete: string,
+    @Body('dateMain') dateMain: string,
+  ): any {
+    return this.timelineService.deleteDuration(
+      timelines,
+      dateToDelete,
+      dateMain,
+    );
+  }
+
+  @Delete()
+  deleteMainDate(
+    @Body('timelines') timelines: TimeLineItem[],
+    @Body('dateMain') dateMain: string,
+  ): any {
+    return this.timelineService.deleteMainDate(timelines, dateMain);
   }
 }
