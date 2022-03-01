@@ -7,6 +7,11 @@ import { TimeLineService } from '../services/timelines.service';
 export class TimelinesController {
   constructor(private readonly timelineService: TimeLineService) {}
 
+  @Get()
+  getTimeline(): any {
+    return this.timelineService.getTimeline();
+  }
+
   @Post()
   createTimeline(
     @Body('age') age: number,
@@ -40,8 +45,6 @@ export class TimelinesController {
     @Body('desc') desc: string,
     @Body('locationType') locationType: string,
     @Body('location') location: string,
-    @Body('timelines') timelines: TimeLineItem[],
-    @Body('visitedPlaces') visitedPlaces: string[],
   ): any {
     return this.timelineService.insertTimeLine(
       age,
@@ -52,29 +55,19 @@ export class TimelinesController {
       desc,
       locationType,
       location,
-      timelines,
-      visitedPlaces,
     );
   }
 
-  @Delete()
+  @Delete('duration')
   deleteDuration(
-    @Body('timelines') timelines: TimeLineItem[],
     @Body('dateToDelete') dateToDelete: string,
+    @Body('dateFromDelete') dateFromDelete: string,
     @Body('dateMain') dateMain: string,
   ): any {
     return this.timelineService.deleteDuration(
-      timelines,
       dateToDelete,
+      dateFromDelete,
       dateMain,
     );
-  }
-
-  @Delete()
-  deleteMainDate(
-    @Body('timelines') timelines: TimeLineItem[],
-    @Body('dateMain') dateMain: string,
-  ): any {
-    return this.timelineService.deleteMainDate(timelines, dateMain);
   }
 }

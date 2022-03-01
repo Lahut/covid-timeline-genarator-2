@@ -14,51 +14,56 @@ function MainPage() {
     locationType: "",
   });
 
-  const initializeState = (key) => {
-    if (localStorage.getItem("timelines") === null) {
-      return [];
-    }
-
-    return JSON.parse(localStorage.getItem(key));
-  };
-
-  const [tokenFromLocalStorage, setTokenFromLocalStorage] = useState({
-    visitedPlace: initializeState("visitedPlaces"),
-    timelines: initializeState("timelines"),
-    patientInfo: initializeState("patient_info"),
-  });
-
   const OnChangeHandler = (e) => {
     SetPatient({ ...patient, [e.target.id]: e.target.value });
   };
 
-  const clearFields = () => {
-    for (const prop in patient) {
-      if (!prop.toString().includes(["age", "gender", "occupation"])) {
-        document.getElementById(prop).value = "";
-      }
+  const [timeline, SetTimeLine] = useState({
+    gender: "unknown",
+    age: "unknown",
+    occupation: "unknow",
+    visitedPlace: [],
+    timelines: [],
+  });
+
+  useEffect(() => {
+    // axios
+    //   .get("http://localhost:3001/timeline")
+    //   .then((res) => {
+    //     SetTimeLine({
+    //       gender: res.data.gender,
+    //       age: res.data.age,
+    //       occupation: res.data.occupation,
+    //       visitedPlace: res.data.visitedPlace,
+    //       timelines: res.data.timeLines,
+    //     });
+    //   })
+    //   .catch((err) => console.log(err));
+    if (localStorage.getItem("timeline")) {
+      const obj = JSON.parse(localStorage.getItem("timeline"));
+      SetTimeLine({
+        gender: obj.gender,
+        age: obj.age,
+        occupation: obj.occupation,
+        visitedPlace: obj.visitedPlace,
+        timelines: obj.timeLines,
+      });
     }
-  };
+  }, []);
 
   const handleSubmit = () => {
-    if (localStorage.getItem("timelines")) {
+    if (localStorage.getItem("timeline")) {
       console.log("put");
-      const body = patient;
-      body["visitedPlaces"] = JSON.parse(localStorage.getItem("visitedPlaces"));
-      body["timelines"] = JSON.parse(localStorage.getItem("timelines"));
       axios
-        .put("http://localhost:3001/timeline", body)
+        .put("http://localhost:3001/timeline", patient)
         .then((res) => {
-          console.log(res.data.visitedPlaces);
-          localStorage.setItem("timelines", JSON.stringify(res.data.timelines));
-          localStorage.setItem(
-            "visitedPlaces",
-            JSON.stringify(res.data.visitedPlaces)
-          );
-          setTokenFromLocalStorage({
-            ...tokenFromLocalStorage,
-            timelines: res.data.timelines,
-            visitedPlace: res.data.visitedPlaces,
+          localStorage.setItem("timeline", JSON.stringify(res.data));
+          SetTimeLine({
+            gender: res.data.gender,
+            age: res.data.age,
+            occupation: res.data.occupation,
+            visitedPlace: res.data.visitedPlace,
+            timelines: res.data.timeLines,
           });
         })
         .catch((err) => console.log(err));
@@ -67,32 +72,39 @@ function MainPage() {
         .post("http://localhost:3001/timeline", patient)
         .then((res) => {
           console.log(res.data.gender);
-          localStorage.setItem("timelines", JSON.stringify(res.data.timeLines));
-          localStorage.setItem(
-            "patient_info",
-            JSON.stringify({
-              age: res.data.age,
-              gender: res.data.gender,
-              occupation: res.data.occupation,
-            })
-          );
-          localStorage.setItem(
-            "visitedPlaces",
-            JSON.stringify(res.data.visitedPlace)
-          );
-
-          setTokenFromLocalStorage({
-            timelines: res.data.timeLines,
+          localStorage.setItem("timeline", JSON.stringify(res.data));
+          SetTimeLine({
+            gender: res.data.gender,
+            age: res.data.age,
+            occupation: res.data.occupation,
             visitedPlace: res.data.visitedPlace,
-            patientInfo: {
-              age: res.data.age,
-              gender: res.data.gender,
-              occupation: res.data.occupation,
-            },
+            timelines: res.data.timeLines,
           });
         })
         .catch((err) => console.log(err));
     }
+  };
+
+  const handleDelete = (dateToDelete, dateFromDelete, dateMain, location) => {
+    const body = {
+      dateToDelete: dateToDelete,
+      dateFromDelete: dateFromDelete,
+      dateMain: dateMain,
+      location: location,
+    };
+    axios
+      .delete("http://localhost:3001/timeline/duration", body)
+      .then((res) => {
+        localStorage.setItem("timeline", JSON.stringify(res.data));
+        SetTimeLine({
+          gender: res.data.gender,
+          age: res.data.age,
+          occupation: res.data.occupation,
+          visitedPlace: res.data.visitedPlace,
+          timelines: res.data.timeLines,
+        });
+      })
+      .catch((err) => console.log(err));
   };
   return (
     <div className="container">
@@ -116,7 +128,6 @@ function MainPage() {
         <div className="item-3 item">
           <p>Occupation</p>
           <input
-            value={patient.occupation}
             id="occupation"
             type="text"
             onChange={(e) => OnChangeHandler(e)}
@@ -127,22 +138,23 @@ function MainPage() {
       <div className="container2 flex">
         <div className="item-1 item">
           <div className="patient-info item">
-            <h6>{tokenFromLocalStorage.patientInfo.gender}</h6>
-            <h3>{tokenFromLocalStorage.patientInfo.age} years old</h3>
-            <h6>{tokenFromLocalStorage.patientInfo.occupation}</h6>
+            <h6>{timeline.gender}</h6>
+            <h3>{timeline.age} years old</h3>
+            <h6>{timeline.occupation}</h6>
           </div>
-          {tokenFromLocalStorage.timelines.map((item, index) => {
+          {timeline.timelines.map((item, index) => {
             return (
               <TimeLineItem
                 key={index}
                 dateMain={item.dateMain}
                 durations={item.durations}
+                updateParent={SetTimeLine}
               />
             );
           })}
           <h2>Visited Places</h2>
           <div className="text-visited">
-            {tokenFromLocalStorage.visitedPlace.map((item) => {
+            {timeline.visitedPlace.map((item) => {
               return (
                 <h4 style={{ color: "white", marginLeft: "5px" }}>{item}</h4>
               );

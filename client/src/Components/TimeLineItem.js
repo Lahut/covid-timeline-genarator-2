@@ -33,6 +33,7 @@ function TimeLineItem(props) {
                       dateTo={item.dateTo}
                       details={item.details}
                       dateMain={props.dateMain}
+                      updateParent={props.updateParent}
                     />
                   ))}
                 </div>

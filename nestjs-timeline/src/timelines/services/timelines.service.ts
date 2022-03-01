@@ -6,7 +6,7 @@ import { TimeLineItem } from '../models/timelineItem.model';
 
 @Injectable()
 export class TimeLineService {
-  timeline: TimeLine[] = [];
+  timeline: TimeLine;
   detail: Detail[] = [];
   duration: Duration[] = [];
   timeLineItem: TimeLineItem[] = [];
@@ -44,7 +44,10 @@ export class TimeLineService {
       this.visitedPlace,
       this.timeLineItem,
     );
-    this.timeline = [];
+
+    if (!this.timeline) {
+      this.timeline = TimeLine_;
+    }
     this.detail = [];
     this.duration = [];
     this.timeLineItem = [];
@@ -62,8 +65,6 @@ export class TimeLineService {
     desc: string,
     locationType: string,
     location: string,
-    timeLine: TimeLineItem[],
-    visitedPlaces: string[],
   ) {
     const mainDate_ = new Date(dateFrom).toLocaleDateString();
     const dateFrom_ = new Date(dateFrom).getTime();
@@ -80,17 +81,18 @@ export class TimeLineService {
       locationType,
       location,
     );
+    this.timeline.age = newTimeLineItem.age;
+    this.timeline.gender = newTimeLineItem.gender;
+    this.timeline.occupation = newTimeLineItem.occupation;
 
-    timeLine.forEach((item: TimeLineItem) => {
+    this.timeline.timeLines.forEach((item: TimeLineItem) => {
       if (new Date(item.dateMain).toLocaleDateString() === mainDate_) {
         item.durations.forEach((item: Duration) => {
           if (
             new Date(item.dateFrom).getTime() === dateFrom_ &&
             new Date(item.dateTo).getTime() === dateTo_
           ) {
-            item.details.push(
-              newTimeLineItem.timeLines[0].durations[0].details[0],
-            );
+            item.details.push(new Detail(desc, location, locationType));
             ++found;
           }
         });
@@ -122,18 +124,17 @@ export class TimeLineService {
       }
     });
     if (found === 0) {
-      timeLine.push(newTimeLineItem.timeLines[0]);
+      this.timeline.timeLines.push(newTimeLineItem.timeLines[0]);
     }
 
     if (this.visitedType.includes(locationType)) {
-      visitedPlaces.push(location);
+      this.timeline.visitedPlace.push(location);
     }
-    let visited_ = new Set(visitedPlaces.sort());
 
-    return {
-      timelines: this.sortTime(timeLine),
-      visitedPlaces: Array.from(visited_),
-    };
+    this.timeline.timeLines = this.sortTime(this.timeline.timeLines);
+
+    let timeline_ = this.timeline;
+    return timeline_;
   }
 
   sortTime(timelines: TimeLineItem[]) {
@@ -145,31 +146,41 @@ export class TimeLineService {
   }
 
   deleteDuration(
-    timelines: TimeLineItem[],
     dateToDelete: string,
+    dateFromDelete: string,
     mainDateToDelete: string,
   ) {
-    const timelines_ = timelines.map((item) => {
-      if (
-        new Date(item.dateMain).getTime() ===
-        new Date(mainDateToDelete).getTime()
-      ) {
-        item.durations.filter(
-          (item) =>
-            new Date(item.dateFrom).getTime() !==
-            new Date(dateToDelete).getTime(),
-        );
+    const main_del = new Date(mainDateToDelete).getTime();
+    const dateFrom_del = new Date(dateFromDelete).getTime();
+    const dateTo_del = new Date(dateToDelete).getTime();
+    var visited = '';
+
+    // this.timeline.timeLines.filter((item) => new Date(item.dateMain).getTime() !== main_del)
+
+    for (let i = 0; i < this.timeline.timeLines.length; i++) {
+      const BigMainDate = new Date(
+        this.timeline.timeLines[i].dateMain,
+      ).getTime();
+      if (BigMainDate === main_del) {
+        const result = this.timeline.timeLines[i].durations.filter((item) => {
+          new Date(item.dateFrom).getTime() !== dateFrom_del &&
+            new Date(item.dateTo).getTime() !== dateTo_del;
+        });
+
+        if (result.length === 0) {
+          this.timeline.timeLines.splice(i, i + 1);
+        } else {
+          this.timeline.timeLines[i].durations = result;
+        }
       }
-    });
-    return { timelines: timelines_ };
+    }
+
+    let timeline_ = this.timeline;
+    return timeline_;
   }
 
-  deleteMainDate(timelines: TimeLineItem[], mainDateToDelete: string) {
-    const tl = timelines.filter(
-      (item) =>
-        new Date(item.dateMain).getTime() !==
-        new Date(mainDateToDelete).getTime(),
-    );
-    return tl;
+  getTimeline() {
+    let timeline_ = this.timeline;
+    return timeline_;
   }
 }

@@ -16,10 +16,28 @@ function Duration(props) {
   const divStyle = {
     display: displayDuration ? "block" : "none",
   };
-  const handleDisplay = () => {
+  const handleDisplay = async () => {
+    const body = {
+      dateToDelete: props.dateTo,
+      dateFromDelete: props.dateFrom,
+      dateMain: props.dateMain,
+    };
+    await axios
+      .delete("http://localhost:3001/timeline/duration", body)
+      .then((res) => {
+        localStorage.setItem("timeline", JSON.stringify(res.data));
+        props.updateParent({
+          gender: res.data.gender,
+          age: res.data.age,
+          occupation: res.data.occupation,
+          visitedPlace: res.data.visitedPlace,
+          timelines: res.data.timeLines,
+        });
+      })
+      .catch((err) => console.log(err));
     setDisplayDuration(!displayDuration);
   };
-
+  //deleteDuration={props.deleteDuration}
   //   console.log(convertTZ(date, "Asia/Jakarta")) // current date-time in jakarta.
   return (
     <div className="detail-div" style={divStyle}>
