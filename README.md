@@ -5,7 +5,7 @@
 ``` npm start ```\
 
 
-open new terminal 
+open new terminal \
 ``` cd .\nestjs-timeline\ ```\
 ``` npm install ```\
 ``` npm start --dev ```\
